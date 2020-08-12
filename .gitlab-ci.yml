@@ -1,0 +1,43 @@
+image: ruby:latest
+# image: node:latest
+
+stages:
+  - devel
+  - staging
+  - production
+
+before_script:
+  - apt-get update -qy
+  - apt-get install -y ruby-dev
+  - gem install dpl
+
+deploy_devel:
+  type: deploy
+  stage: devel
+  image: ruby:latest
+  script:
+    - echo "Deploying to devel"
+    - dpl --provider=heroku --app=$HEROKU_APP_DEVEL --api-key=$HEROKU_API_KEY
+  only:
+    - test
+
+deploy_staging:
+  type: deploy
+  stage: staging
+  image: ruby:latest
+  script:
+    - echo "Deploying to stage"
+    - dpl --provider=heroku --app=$HEROKU_APP_STAGING --api-key=$HEROKU_API_KEY
+  only:
+    - stage
+
+deploy_www:
+  stage: production
+  script:
+    - echo "Deploying to www"
+    - dpl --provider=heroku --app=$HEROKU_APP_PRODUCTION --api-key=$HEROKU_API_KEY
+  only:
+    - master
+  # environment:
+  #   name: www
+  #   url: https://romak.co.ke
